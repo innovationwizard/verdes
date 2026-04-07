@@ -2,13 +2,6 @@
 
 import { useShipmentStore } from "@/stores/shipment-store";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { LABELS } from "@/lib/constants/labels";
 import { AllocationTable } from "./allocation-table";
 import { CapacityBar } from "./capacity-bar";
@@ -19,6 +12,7 @@ export function ContainerPanel() {
   const pnl = useShipmentStore((s) => s.pnl);
   const addContainer = useShipmentStore((s) => s.addContainer);
   const removeContainer = useShipmentStore((s) => s.removeContainer);
+  const setContainerSize = useShipmentStore((s) => s.setContainerSize);
 
   return (
     <div className="flex-1 overflow-auto p-4">
@@ -31,10 +25,34 @@ export function ContainerPanel() {
         return (
           <div key={container.id} className="mb-4">
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                {LABELS.contenedor} {container.sequence_number} —{" "}
-                {container.size === "20ft" ? "20'" : "40'"}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {LABELS.contenedor} {container.sequence_number}
+                </p>
+                {/* Size toggle */}
+                <div className="flex items-center gap-1">
+                  <button
+                    className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+                      container.size === "20ft"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => setContainerSize(container.id, "20ft")}
+                  >
+                    20&apos;
+                  </button>
+                  <button
+                    className={`rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+                      container.size === "40ft"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => setContainerSize(container.id, "40ft")}
+                  >
+                    40&apos;
+                  </button>
+                </div>
+              </div>
               {containers.length > 1 && (
                 <Button
                   variant="ghost"
@@ -60,20 +78,14 @@ export function ContainerPanel() {
         );
       })}
 
-      <div className="mt-3 flex gap-2">
-        <Select
-          onValueChange={(v) => addContainer(v as "20ft" | "40ft")}
-        >
-          <SelectTrigger className="h-9 w-full border-dashed">
-            <Plus className="mr-1 h-4 w-4" />
-            <SelectValue placeholder={LABELS.agregar_contenedor} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="20ft">Contenedor 20&apos;</SelectItem>
-            <SelectItem value="40ft">Contenedor 40&apos;</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Button
+        variant="outline"
+        className="mt-3 w-full border-dashed"
+        onClick={() => addContainer("20ft")}
+      >
+        <Plus className="mr-1 h-4 w-4" />
+        {LABELS.agregar_contenedor}
+      </Button>
     </div>
   );
 }

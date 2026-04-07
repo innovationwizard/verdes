@@ -80,6 +80,7 @@ interface ShipmentState {
     gradeCode: string,
     pct: number
   ) => void;
+  setContainerSize: (containerId: string, size: "20ft" | "40ft") => void;
   addContainer: (size: "20ft" | "40ft") => void;
   removeContainer: (containerId: string) => void;
   setStatus: (status: ShipmentMeta["status"]) => void;
@@ -87,6 +88,13 @@ interface ShipmentState {
     costName: string,
     category: string,
     amount: number
+  ) => void;
+  addExtraCost: (category: CostLineInput["category"]) => void;
+  removeExtraCost: (costName: string, category: string) => void;
+  renameExtraCost: (
+    oldName: string,
+    category: string,
+    newName: string
   ) => void;
   loadShipment: (data: {
     meta: ShipmentMeta;
@@ -229,6 +237,18 @@ export const useShipmentStore = create<ShipmentState>((set) => ({
     });
   },
 
+  setContainerSize: (containerId, size) => {
+    set((state) => {
+      const capacity = size === "20ft" ? 10000 : 23000;
+      const newContainers = state.containers.map((c) => {
+        if (c.id !== containerId) return c;
+        return { ...c, size, capacity_kg: capacity };
+      });
+      const newState = { ...state, containers: newContainers, isDirty: true };
+      return { ...newState, pnl: calculatePnl(buildPnlInput(newState)) };
+    });
+  },
+
   addContainer: (size) => {
     set((state) => {
       const maxSeq = state.containers.reduce(
@@ -282,6 +302,45 @@ export const useShipmentStore = create<ShipmentState>((set) => ({
       );
       const newState = { ...state, costs: newCosts, isDirty: true };
       return { ...newState, pnl: calculatePnl(buildPnlInput(newState)) };
+    });
+  },
+
+  addExtraCost: (category) => {
+    set((state) => {
+      const extraCount = state.costs.filter(
+        (c) => c.category === category && c.name.startsWith("Extra:")
+      ).length;
+      const newCost: CostLineInput = {
+        category,
+        name: `Extra: Gasto ${extraCount + 1}`,
+        amount: 0,
+        currency: "GTQ",
+        unit: "flat",
+      };
+      const newCosts = [...state.costs, newCost];
+      const newState = { ...state, costs: newCosts, isDirty: true };
+      return { ...newState, pnl: calculatePnl(buildPnlInput(newState)) };
+    });
+  },
+
+  removeExtraCost: (costName, category) => {
+    set((state) => {
+      const newCosts = state.costs.filter(
+        (c) => !(c.name === costName && c.category === category)
+      );
+      const newState = { ...state, costs: newCosts, isDirty: true };
+      return { ...newState, pnl: calculatePnl(buildPnlInput(newState)) };
+    });
+  },
+
+  renameExtraCost: (oldName, category, newName) => {
+    set((state) => {
+      const newCosts = state.costs.map((c) =>
+        c.name === oldName && c.category === category
+          ? { ...c, name: newName }
+          : c
+      );
+      return { costs: newCosts, isDirty: true };
     });
   },
 

@@ -121,9 +121,11 @@ export function PnlSummary() {
             </td>
           </tr>
 
-          {/* Expanded cost categories */}
+          {/* Expanded cost categories — hide empty container-size categories */}
           {expandedCosts &&
-            pnl.costs_by_category.map((cat) => (
+            pnl.costs_by_category
+            .filter((cat) => cat.total_usd !== 0 || !["export_fixed_20", "export_var_20", "export_fixed_40", "export_var_40"].includes(cat.category))
+            .map((cat) => (
               <tr key={cat.category} className="border-b bg-muted/20">
                 <td className="py-1 pl-8 text-xs text-muted-foreground">
                   {CATEGORY_LABELS[cat.category] ?? cat.category}
