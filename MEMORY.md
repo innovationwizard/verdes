@@ -1,0 +1,5 @@
+- [User profile](memory/user_profile.md) — Jorge, developer/master role on MIG Export cardamom P&L app
+- [Language requirement](memory/lang_spanish.md) — All user-facing text must be in Latin American Spanish
+- [Project overview](memory/project_overview.md) — MIG Export: cardamom export P&L app replacing Excel, Supabase + Next.js
+- [Quality grades](memory/quality_grades.md) — Three tiers: Top (P1-P3), Medium (S1-S2), Low (GOP, YELLOW, MYQ, TRIP, ORO)
+- [Roles](memory/roles.md) — master=developer, operator=José, gerencia=c-level view-only
