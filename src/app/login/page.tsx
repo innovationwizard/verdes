@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LABELS } from "@/lib/constants/labels";
+import { Leaf } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,7 +42,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">{LABELS.app_name}</CardTitle>
+          <CardTitle className="flex items-center justify-center gap-2 text-xl">
+            <Leaf className="h-5 w-5 text-primary" />
+            {LABELS.app_name}
+          </CardTitle>
           <p className="text-sm text-muted-foreground">
             {LABELS.app_description}
           </p>

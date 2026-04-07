@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LABELS } from "@/lib/constants/labels";
-import { LogOut, User, ChevronDown } from "lucide-react";
+import { LogOut, User, ChevronDown, Leaf } from "lucide-react";
 
 interface HeaderProps {
   user: {
@@ -56,7 +56,8 @@ export function Header({ user }: HeaderProps) {
     <header className="border-b bg-card">
       <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link href="/embarques" className="text-sm font-semibold tracking-tight">
+          <Link href="/embarques" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+            <Leaf className="h-4 w-4 text-primary" />
             {LABELS.app_name}
           </Link>
           <nav className="flex gap-1">
