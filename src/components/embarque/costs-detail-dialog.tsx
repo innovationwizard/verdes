@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { useShipmentStore } from "@/stores/shipment-store";
 import {
   Dialog,
@@ -49,6 +50,49 @@ const CAPACITY: Record<string, number> = {
   export_var_20: 10000,
   export_var_40: 23000,
 };
+
+/**
+ * Input that keeps local state while focused so store-driven re-renders
+ * don't overwrite the user's in-progress typing.
+ */
+function LocalNumberInput({
+  externalValue,
+  onCommit,
+  step,
+  className,
+}: {
+  externalValue: number;
+  onCommit: (v: number) => void;
+  step?: string;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [local, setLocal] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const display = editing ? local : externalValue ? String(externalValue) : "";
+
+  return (
+    <Input
+      ref={inputRef}
+      type="number"
+      value={display}
+      onFocus={() => {
+        setLocal(externalValue ? String(externalValue) : "");
+        setEditing(true);
+      }}
+      onChange={(e) => {
+        setLocal(e.target.value);
+      }}
+      onBlur={() => {
+        setEditing(false);
+        onCommit(parseFloat(local) || 0);
+      }}
+      step={step}
+      className={className}
+    />
+  );
+}
 
 export function CostsDetailDialog({
   open,
@@ -191,12 +235,9 @@ export function CostsDetailDialog({
                                   )}
                                 </td>
                                 <td className="py-1.5 text-right">
-                                  <Input
-                                    type="number"
-                                    value={displayValue || ""}
-                                    onChange={(e) => {
-                                      const inputVal =
-                                        parseFloat(e.target.value) || 0;
+                                  <LocalNumberInput
+                                    externalValue={displayValue}
+                                    onCommit={(inputVal) => {
                                       const storeVal = group.isVariableExport
                                         ? inputVal / group.capacity
                                         : inputVal;
@@ -280,12 +321,14 @@ function InvoiceVariableTable({
             <tr key={item.name} className="border-b">
               <td className="py-1.5 text-sm">{item.name}</td>
               <td className="py-1.5 text-right">
-                <Input
-                  type="number"
-                  value={item.amount > 0 ? (item.amount * 100).toFixed(2) : ""}
-                  onChange={(e) => {
-                    const pct = (parseFloat(e.target.value) || 0) / 100;
-                    onOverride(item.name, item.category, pct);
+                <LocalNumberInput
+                  externalValue={
+                    item.amount > 0
+                      ? parseFloat((item.amount * 100).toFixed(2))
+                      : 0
+                  }
+                  onCommit={(pctVal) => {
+                    onOverride(item.name, item.category, pctVal / 100);
                   }}
                   step="0.01"
                   className="ml-auto h-6 w-20 text-right text-xs"
