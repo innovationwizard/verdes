@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useShipmentStore } from "@/stores/shipment-store";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,14 +21,27 @@ function NumberInput({
   step?: string;
   suffix?: string;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [local, setLocal] = useState("");
+
+  const display = editing ? local : value ? String(value) : "";
+
   return (
     <div>
       <Label className="text-xs text-muted-foreground">{label}</Label>
       <div className="relative">
         <Input
           type="number"
-          value={value || ""}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+          value={display}
+          onFocus={() => {
+            setLocal(value ? String(value) : "");
+            setEditing(true);
+          }}
+          onChange={(e) => setLocal(e.target.value)}
+          onBlur={() => {
+            setEditing(false);
+            onChange(parseFloat(local) || 0);
+          }}
           step={step ?? "1"}
           className="h-8 text-sm"
         />
@@ -37,6 +51,44 @@ function NumberInput({
           </span>
         )}
       </div>
+    </div>
+  );
+}
+
+function ParamRow({
+  label,
+  externalValue,
+  onCommit,
+  step,
+}: {
+  label: string;
+  externalValue: number;
+  onCommit: (v: number) => void;
+  step?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [local, setLocal] = useState("");
+
+  const display = editing ? local : externalValue ? String(externalValue) : "";
+
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <Input
+        type="number"
+        value={display}
+        onFocus={() => {
+          setLocal(externalValue ? String(externalValue) : "");
+          setEditing(true);
+        }}
+        onChange={(e) => setLocal(e.target.value)}
+        onBlur={() => {
+          setEditing(false);
+          onCommit(parseFloat(local) || 0);
+        }}
+        step={step}
+        className="h-6 w-16 text-right text-xs"
+      />
     </div>
   );
 }
@@ -115,59 +167,30 @@ export function PurchasePanel() {
       </p>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{LABELS.merma}</span>
-          <Input
-            type="number"
-            value={(params.merma_pct * 100).toFixed(1)}
-            onChange={(e) =>
-              setParam("merma_pct", (parseFloat(e.target.value) || 0) / 100)
-            }
-            step="0.1"
-            className="h-6 w-16 text-right text-xs"
-          />
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{LABELS.interes}</span>
-          <Input
-            type="number"
-            value={(params.interest_rate_annual * 100).toFixed(2)}
-            onChange={(e) =>
-              setParam(
-                "interest_rate_annual",
-                (parseFloat(e.target.value) || 0) / 100
-              )
-            }
-            step="0.25"
-            className="h-6 w-16 text-right text-xs"
-          />
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {LABELS.meses_financiamiento}
-          </span>
-          <Input
-            type="number"
-            value={params.financing_months}
-            onChange={(e) =>
-              setParam("financing_months", parseFloat(e.target.value) || 0)
-            }
-            step="0.5"
-            className="h-6 w-16 text-right text-xs"
-          />
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{LABELS.isr}</span>
-          <Input
-            type="number"
-            value={(params.isr_pct * 100).toFixed(0)}
-            onChange={(e) =>
-              setParam("isr_pct", (parseFloat(e.target.value) || 0) / 100)
-            }
-            step="1"
-            className="h-6 w-16 text-right text-xs"
-          />
-        </div>
+        <ParamRow
+          label={LABELS.merma}
+          externalValue={parseFloat((params.merma_pct * 100).toFixed(1))}
+          onCommit={(v) => setParam("merma_pct", v / 100)}
+          step="0.1"
+        />
+        <ParamRow
+          label={LABELS.interes}
+          externalValue={parseFloat((params.interest_rate_annual * 100).toFixed(2))}
+          onCommit={(v) => setParam("interest_rate_annual", v / 100)}
+          step="0.25"
+        />
+        <ParamRow
+          label={LABELS.meses_financiamiento}
+          externalValue={params.financing_months}
+          onCommit={(v) => setParam("financing_months", v)}
+          step="0.5"
+        />
+        <ParamRow
+          label={LABELS.isr}
+          externalValue={parseFloat((params.isr_pct * 100).toFixed(0))}
+          onCommit={(v) => setParam("isr_pct", v / 100)}
+          step="1"
+        />
       </div>
     </div>
   );
