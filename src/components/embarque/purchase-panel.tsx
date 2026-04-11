@@ -55,50 +55,11 @@ function NumberInput({
   );
 }
 
-function ParamRow({
-  label,
-  externalValue,
-  onCommit,
-  step,
-}: {
-  label: string;
-  externalValue: number;
-  onCommit: (v: number) => void;
-  step?: string;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [local, setLocal] = useState("");
-
-  const display = editing ? local : externalValue ? String(externalValue) : "";
-
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <Input
-        type="number"
-        value={display}
-        onFocus={() => {
-          setLocal(externalValue ? String(externalValue) : "");
-          setEditing(true);
-        }}
-        onChange={(e) => setLocal(e.target.value)}
-        onBlur={() => {
-          setEditing(false);
-          onCommit(parseFloat(local) || 0);
-        }}
-        step={step}
-        className="h-6 w-16 text-right text-xs"
-      />
-    </div>
-  );
-}
 
 export function PurchasePanel() {
   const purchase = useShipmentStore((s) => s.purchase);
-  const params = useShipmentStore((s) => s.params);
   const pnl = useShipmentStore((s) => s.pnl);
   const setPurchase = useShipmentStore((s) => s.setPurchase);
-  const setParam = useShipmentStore((s) => s.setParam);
 
   return (
     <div className="flex flex-col gap-4 border-r p-4" style={{ width: 260 }}>
@@ -159,39 +120,6 @@ export function PurchasePanel() {
         </div>
       </div>
 
-      <Separator />
-
-      {/* Section: Parameters */}
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-        {LABELS.parametros}
-      </p>
-
-      <div className="space-y-1.5">
-        <ParamRow
-          label={LABELS.merma}
-          externalValue={parseFloat((params.merma_pct * 100).toFixed(1))}
-          onCommit={(v) => setParam("merma_pct", v / 100)}
-          step="0.1"
-        />
-        <ParamRow
-          label={LABELS.interes}
-          externalValue={parseFloat((params.interest_rate_annual * 100).toFixed(2))}
-          onCommit={(v) => setParam("interest_rate_annual", v / 100)}
-          step="0.25"
-        />
-        <ParamRow
-          label={LABELS.meses_financiamiento}
-          externalValue={params.financing_months}
-          onCommit={(v) => setParam("financing_months", v)}
-          step="0.5"
-        />
-        <ParamRow
-          label={LABELS.isr}
-          externalValue={parseFloat((params.isr_pct * 100).toFixed(0))}
-          onCommit={(v) => setParam("isr_pct", v / 100)}
-          step="1"
-        />
-      </div>
     </div>
   );
 }
